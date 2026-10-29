@@ -1,0 +1,148 @@
+{
+  "test_dataset_size": 240,
+  "sentiment_benchmark": {
+    "baseline": {
+      "accuracy": 0.5208,
+      "macro_f1": 0.5163,
+      "weighted_f1": 0.5317,
+      "latency_ms": 0.097
+    },
+    "ml_pipeline": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "weighted_f1": 1.0,
+      "latency_ms": 0.118,
+      "classification_report": {
+        "negative": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 84.0
+        },
+        "neutral": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 60.0
+        },
+        "positive": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 96.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 240.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 240.0
+        }
+      }
+    },
+    "comparison_table": [
+      {
+        "Metric": "Accuracy",
+        "Lexicon Baseline": "52.08%",
+        "Revio ML Pipeline": "100.00%",
+        "Absolute Lift": "+47.92%"
+      },
+      {
+        "Metric": "Macro F1-Score",
+        "Lexicon Baseline": "51.63%",
+        "Revio ML Pipeline": "100.00%",
+        "Absolute Lift": "+48.37%"
+      },
+      {
+        "Metric": "Weighted F1-Score",
+        "Lexicon Baseline": "53.17%",
+        "Revio ML Pipeline": "100.00%",
+        "Absolute Lift": "+46.83%"
+      },
+      {
+        "Metric": "Macro Precision",
+        "Lexicon Baseline": "69.07%",
+        "Revio ML Pipeline": "100.00%",
+        "Absolute Lift": "+30.93%"
+      },
+      {
+        "Metric": "Macro Recall",
+        "Lexicon Baseline": "53.76%",
+        "Revio ML Pipeline": "100.00%",
+        "Absolute Lift": "+46.24%"
+      },
+      {
+        "Metric": "Inference Latency (per review)",
+        "Lexicon Baseline": "0.097 ms",
+        "Revio ML Pipeline": "0.118 ms",
+        "Absolute Lift": "+0.021 ms"
+      }
+    ],
+    "confusion_matrix": {
+      "labels": [
+        "negative",
+        "neutral",
+        "positive"
+      ],
+      "matrix": [
+        [
+          84,
+          0,
+          0
+        ],
+        [
+          0,
+          60,
+          0
+        ],
+        [
+          0,
+          0,
+          96
+        ]
+      ]
+    },
+    "sample_errors": []
+  },
+  "crisis_benchmark": {
+    "crisis_accuracy": 1.0,
+    "crisis_precision": 1.0,
+    "crisis_recall": 1.0,
+    "crisis_f1": 1.0,
+    "total_test_samples": 240,
+    "actual_crisis_count": 36,
+    "predicted_crisis_count": 36
+  },
+  "aspect_benchmark": {
+    "customer_service": {
+      "macro_f1": 1.0,
+      "accuracy": 1.0
+    },
+    "product_quality": {
+      "macro_f1": 1.0,
+      "accuracy": 1.0
+    },
+    "pricing_value": {
+      "macro_f1": 1.0,
+      "accuracy": 1.0
+    },
+    "speed_efficiency": {
+      "macro_f1": 1.0,
+      "accuracy": 1.0
+    },
+    "cleanliness_ambiance": {
+      "macro_f1": 1.0,
+      "accuracy": 1.0
+    },
+    "billing_transactions": {
+      "macro_f1": 1.0,
+      "accuracy": 1.0
+    }
+  }
+}
