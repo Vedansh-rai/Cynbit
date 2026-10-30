@@ -84,7 +84,7 @@ class RevioInferenceEngine:
         classes = self.sentiment_model.get_classes()
         probs = self.sentiment_model.predict_proba([cleaned])[0]
         pred_idx = int(np.argmax(probs))
-        sentiment_pred = classes[pred_idx]
+        sentiment_pred = str(classes[pred_idx])
         confidence = float(probs[pred_idx])
         prob_dict = {cls: round(float(p), 4) for cls, p in zip(classes, probs)}
 
@@ -156,18 +156,18 @@ class RevioInferenceEngine:
                     "review_id": row.get("id", len(results) + 1),
                     "review_text": text,
                     "location": loc,
-                    "sentiment": analysis["sentiment"]["label"],
+                    "sentiment": str(analysis["sentiment"]["label"]),
                     "confidence": analysis["sentiment"]["confidence"],
-                    "risk_tier": analysis["risk_assessment"]["risk_tier"],
+                    "risk_tier": str(analysis["risk_assessment"]["risk_tier"]),
                     "risk_score": analysis["risk_assessment"]["risk_score"],
                     "active_triggers": "; ".join(analysis["risk_assessment"]["active_triggers"]),
                     "recommended_action": analysis["risk_assessment"]["recommended_action"],
-                    "service_sentiment": analysis["aspects"]["customer_service"]["sentiment"],
-                    "quality_sentiment": analysis["aspects"]["product_quality"]["sentiment"],
-                    "pricing_sentiment": analysis["aspects"]["pricing_value"]["sentiment"],
-                    "speed_sentiment": analysis["aspects"]["speed_efficiency"]["sentiment"],
-                    "cleanliness_sentiment": analysis["aspects"]["cleanliness_ambiance"]["sentiment"],
-                    "billing_sentiment": analysis["aspects"]["billing_transactions"]["sentiment"],
+                    "service_sentiment": str(analysis["aspects"]["customer_service"]["sentiment"]),
+                    "quality_sentiment": str(analysis["aspects"]["product_quality"]["sentiment"]),
+                    "pricing_sentiment": str(analysis["aspects"]["pricing_value"]["sentiment"]),
+                    "speed_sentiment": str(analysis["aspects"]["speed_efficiency"]["sentiment"]),
+                    "cleanliness_sentiment": str(analysis["aspects"]["cleanliness_ambiance"]["sentiment"]),
+                    "billing_sentiment": str(analysis["aspects"]["billing_transactions"]["sentiment"]),
                     "latency_ms": analysis["latency_ms"]
                 }
             else:
@@ -192,3 +192,4 @@ class RevioInferenceEngine:
             results.append(record)
 
         return pd.DataFrame(results)
+

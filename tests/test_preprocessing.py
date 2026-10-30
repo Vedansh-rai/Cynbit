@@ -86,3 +86,4 @@ class TestLinguisticAndCrisisDetection:
     def test_legal_threat_trigger(self):
         triggers = detect_crisis_triggers("Our lawyer is filing a lawsuit in consumer court.")
         assert "legal_threat" in triggers
+

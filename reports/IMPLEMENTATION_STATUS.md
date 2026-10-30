@@ -86,3 +86,4 @@ Multi-Aspect Sentiment (ABSA):
 2. **FastAPI Endpoints**: Expose `/api/v1/reviews/triage` for real-time webhook ingestion.
 3. **Webhook Ingestion**: Connect OAuth streams for Google Business Profiles, Yelp Fusion API, and Trustpilot.
 4. **Active Learning Loop**: Route reviews with confidence < 0.65 to branch managers to establish an active annotation pipeline.
+

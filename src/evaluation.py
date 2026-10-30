@@ -17,6 +17,7 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report
 )
+from sklearn.dummy import DummyClassifier
 
 from src.model import (
     BaselineSentimentHeuristic,
@@ -38,6 +39,19 @@ def evaluate_sentiment_models(
     """
     texts = test_df[text_col].tolist()
     y_true = test_df[label_col].tolist()
+
+    # --- 0. Evaluate Dummy Classifier (true statistical floor) ---
+    dummy = DummyClassifier(strategy="most_frequent", random_state=42)
+    dummy.fit(texts, y_true)  # fit needed but ignored; DummyClassifier uses label distribution only
+    t0 = time.perf_counter()
+    y_pred_dummy = dummy.predict(texts)
+    dummy_latency_ms = ((time.perf_counter() - t0) / len(texts)) * 1000
+
+    dummy_acc = accuracy_score(y_true, y_pred_dummy)
+    dummy_f1_macro = f1_score(y_true, y_pred_dummy, average="macro", zero_division=0)
+    dummy_f1_weighted = f1_score(y_true, y_pred_dummy, average="weighted", zero_division=0)
+    dummy_prec_macro = precision_score(y_true, y_pred_dummy, average="macro", zero_division=0)
+    dummy_rec_macro = recall_score(y_true, y_pred_dummy, average="macro", zero_division=0)
 
     # --- 1. Evaluate Baseline Heuristic ---
     baseline = BaselineSentimentHeuristic()
@@ -80,43 +94,55 @@ def evaluate_sentiment_models(
     comparison_table = [
         {
             "Metric": "Accuracy",
+            "Dummy Baseline": f"{dummy_acc * 100:.2f}%",
             "Lexicon Baseline": f"{base_acc * 100:.2f}%",
             "Revio ML Pipeline": f"{ml_acc * 100:.2f}%",
-            "Absolute Lift": f"{(ml_acc - base_acc) * 100:+.2f}%"
+            "Lift vs Dummy": f"{(ml_acc - dummy_acc) * 100:+.2f}%"
         },
         {
             "Metric": "Macro F1-Score",
+            "Dummy Baseline": f"{dummy_f1_macro * 100:.2f}%",
             "Lexicon Baseline": f"{base_f1_macro * 100:.2f}%",
             "Revio ML Pipeline": f"{ml_f1_macro * 100:.2f}%",
-            "Absolute Lift": f"{(ml_f1_macro - base_f1_macro) * 100:+.2f}%"
+            "Lift vs Dummy": f"{(ml_f1_macro - dummy_f1_macro) * 100:+.2f}%"
         },
         {
             "Metric": "Weighted F1-Score",
+            "Dummy Baseline": f"{dummy_f1_weighted * 100:.2f}%",
             "Lexicon Baseline": f"{base_f1_weighted * 100:.2f}%",
             "Revio ML Pipeline": f"{ml_f1_weighted * 100:.2f}%",
-            "Absolute Lift": f"{(ml_f1_weighted - base_f1_weighted) * 100:+.2f}%"
+            "Lift vs Dummy": f"{(ml_f1_weighted - dummy_f1_weighted) * 100:+.2f}%"
         },
         {
             "Metric": "Macro Precision",
+            "Dummy Baseline": f"{dummy_prec_macro * 100:.2f}%",
             "Lexicon Baseline": f"{base_prec_macro * 100:.2f}%",
             "Revio ML Pipeline": f"{ml_prec_macro * 100:.2f}%",
-            "Absolute Lift": f"{(ml_prec_macro - base_prec_macro) * 100:+.2f}%"
+            "Lift vs Dummy": f"{(ml_prec_macro - dummy_prec_macro) * 100:+.2f}%"
         },
         {
             "Metric": "Macro Recall",
+            "Dummy Baseline": f"{dummy_rec_macro * 100:.2f}%",
             "Lexicon Baseline": f"{base_rec_macro * 100:.2f}%",
             "Revio ML Pipeline": f"{ml_rec_macro * 100:.2f}%",
-            "Absolute Lift": f"{(ml_rec_macro - base_rec_macro) * 100:+.2f}%"
+            "Lift vs Dummy": f"{(ml_rec_macro - dummy_rec_macro) * 100:+.2f}%"
         },
         {
             "Metric": "Inference Latency (per review)",
+            "Dummy Baseline": f"{dummy_latency_ms:.3f} ms",
             "Lexicon Baseline": f"{base_latency_ms:.3f} ms",
             "Revio ML Pipeline": f"{ml_latency_ms:.3f} ms",
-            "Absolute Lift": f"{ml_latency_ms - base_latency_ms:+.3f} ms"
+            "Lift vs Dummy": f"{ml_latency_ms - dummy_latency_ms:+.3f} ms"
         }
     ]
 
     return {
+        "dummy_baseline": {
+            "accuracy": round(dummy_acc, 4),
+            "macro_f1": round(dummy_f1_macro, 4),
+            "weighted_f1": round(dummy_f1_weighted, 4),
+            "latency_ms": round(dummy_latency_ms, 3)
+        },
         "baseline": {
             "accuracy": round(base_acc, 4),
             "macro_f1": round(base_f1_macro, 4),
@@ -203,3 +229,4 @@ def evaluate_aspect_suite(
             "accuracy": round(acc, 4)
         }
     return aspect_scores
+

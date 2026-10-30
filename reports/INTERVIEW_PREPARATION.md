@@ -96,3 +96,4 @@ In a production environment with messy human slang, typos, sarcasm, and code-swi
 1. **Month 1 (Production Webhooks & RBAC)**: Connect live Google My Business API and Yelp webhooks, add PostgreSQL persistence, and implement role-based access for multi-unit franchise managers.
 2. **Month 2 (Multilingual / Hinglish Support)**: Train multilingual embeddings or IndicBERT for Hindi and Hinglish reviews, which are vital for retail and dining clients across Rajasthan and India.
 3. **Month 3 (Autonomous Resolution Multi-Agent)**: Build autonomous resolution workflows where approved responses can trigger automated CRM ticket creation, POS transaction audit requests, and customer compensation vouchers within pre-approved budget rules."*
+

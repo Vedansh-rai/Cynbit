@@ -42,3 +42,4 @@ htmlcov/
 
 # Local model cache (optional, serialized models can be committed or generated)
 # models/*.joblib
+

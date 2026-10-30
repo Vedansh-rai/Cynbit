@@ -73,3 +73,4 @@ class TestResponseEngine:
             )
             assert len(res["draft_response"]) > 20
             assert res["tone"] == tone
+

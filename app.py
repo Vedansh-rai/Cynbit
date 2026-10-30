@@ -242,6 +242,14 @@ with tab1:
             with kpi4:
                 st.markdown(f"<div class='metric-card'><h4>Processing Latency</h4><h2 style='color: #6366F1;'>{analysis['latency_ms']:.2f} ms</h2><p>High-Throughput ML</p></div>", unsafe_allow_html=True)
 
+            # Confidence threshold warning
+            if sent_data["confidence"] < 0.70:
+                st.warning(
+                    f"⚠️ **Low Model Confidence** ({sent_data['confidence']*100:.1f}%). "
+                    "The review may contain ambiguous or mixed language. "
+                    "Human review is recommended before publishing any automated response."
+                )
+
             # Urgent Action Box if High/Critical
             if risk_data["risk_tier"] == "CRITICAL":
                 st.markdown(f"""
@@ -371,6 +379,65 @@ with tab2:
         loc_summary = triaged_df.groupby("location")["sentiment"].value_counts().unstack().fillna(0)
         st.bar_chart(loc_summary)
 
+        # --- 7-Day Rolling Sentiment Trend ---
+        st.markdown("---")
+        st.subheader("📈 7-Day Rolling Sentiment Trend")
+        np.random.seed(42)
+        # Simulate review dates spread over past 7 days for demonstration
+        triaged_df_trend = triaged_df.copy()
+        triaged_df_trend["simulated_day"] = np.random.choice(
+            [f"Day {i+1}" for i in range(7)], size=len(triaged_df_trend)
+        )
+        trend_data = (
+            triaged_df_trend.groupby("simulated_day")["sentiment"]
+            .apply(lambda s: (s == "positive").sum() / len(s) * 100)
+            .reindex([f"Day {i+1}" for i in range(7)])
+            .fillna(0)
+            .rename("Positive Sentiment %")
+        )
+        st.line_chart(trend_data, use_container_width=True)
+        st.caption("⚠️ *Dates are simulated for demonstration purposes. In production, real review timestamps are used.*")
+
+        # --- Aspect Sentiment Heatmap per Location ---
+        st.markdown("---")
+        st.subheader("🔥 Aspect Sentiment Distribution by Location")
+        aspect_cols = [c for c in triaged_df.columns if c.startswith("aspect_")]
+        if aspect_cols:
+            heatmap_rows = []
+            for loc, grp in triaged_df.groupby("location"):
+                row = {"Location": loc}
+                for col in aspect_cols:
+                    asp_label = col.replace("aspect_", "").replace("_", " ").title()
+                    if col in grp.columns:
+                        pos_count = int((grp[col] == "positive").sum())
+                        neg_count = int((grp[col] == "negative").sum())
+                        row[asp_label] = f"+{pos_count} / -{neg_count}"
+                heatmap_rows.append(row)
+            if heatmap_rows:
+                hm_df = pd.DataFrame(heatmap_rows).set_index("Location")
+                st.dataframe(hm_df, use_container_width=True)
+                st.caption("Format: *+positive count / -negative count per aspect per location*")
+        else:
+            st.info("No aspect columns found in batch output.")
+
+        # --- Anomaly Detection: Sudden Sentiment Drop via Z-Score ---
+        st.markdown("---")
+        st.subheader("🚨 Location Anomaly Detection (Z-Score Risk Spike)")
+        loc_risk = triaged_df.groupby("location")["risk_score"].mean().reset_index()
+        loc_risk.columns = ["Location", "Avg Risk Score"]
+        if len(loc_risk) > 1:
+            mean_risk = loc_risk["Avg Risk Score"].mean()
+            std_risk = loc_risk["Avg Risk Score"].std()
+            loc_risk["Z-Score"] = (loc_risk["Avg Risk Score"] - mean_risk) / (std_risk if std_risk > 0 else 1)
+            loc_risk["Status"] = loc_risk["Z-Score"].apply(
+                lambda z: "🔴 Anomalous — Sudden Sentiment Drop" if z > 1.5 else "✅ Normal"
+            )
+            loc_risk["Avg Risk Score"] = loc_risk["Avg Risk Score"].round(3)
+            loc_risk["Z-Score"] = loc_risk["Z-Score"].round(2)
+            st.dataframe(loc_risk, use_container_width=True)
+        else:
+            st.info("Not enough location data for anomaly detection (need ≥ 2 locations).")
+
         st.download_button(
             "📥 Download Triaged Audit CSV",
             data=triaged_df.to_csv(index=False),
@@ -490,3 +557,4 @@ st.markdown("""
     <em>Notice: Demonstrates architectural and algorithmic feasibility using synthetic validation data. Operates entirely locally with zero external API dependencies required.</em>
 </div>
 """, unsafe_allow_html=True)
+

@@ -6,6 +6,7 @@ Provides:
 2. Optional External LLM Integration (OpenAI-compatible) with strict JSON schema validation
 3. Hallucination defenses, prompt injection sanitization, and compliance guardrails
 4. Human-in-the-loop escalation gating
+5. Extractive complaint injection - pulls the most negative sentence from the review for specific acknowledgement
 """
 
 from typing import Dict, Any, List, Optional
@@ -51,6 +52,47 @@ def sanitize_prompt_input(text: str) -> str:
     # Neutralize HTML/XML tags
     neutralized = neutralized.replace("<", "&lt;").replace(">", "&gt;")
     return neutralized.strip()
+
+
+# Negative signal lexicon for extractive complaint sentence scoring
+_NEG_SIGNALS = {
+    "terrible", "awful", "horrible", "worst", "rude", "disgusting",
+    "filthy", "fraud", "scam", "poisoning", "sick", "wait", "waited", "delay",
+    "slow", "overcharged", "double", "ignored", "dismissed", "arrogant",
+    "unprofessional", "unacceptable", "never", "disaster", "broken", "cold",
+    "stale", "dirty", "harassment", "lawsuit", "lawyer", "refund", "error",
+    "mistake", "wrong", "bad", "poor", "disappointing", "disgusted", "furious",
+    "angry", "shocking", "appalling", "dreadful", "pathetic", "useless"
+}
+
+
+def extract_key_complaint(text: str, max_len: int = 120) -> Optional[str]:
+    """
+    Extract the most complaint-dense sentence from the review for specific
+    acknowledgement in the AI response, improving contextual grounding.
+
+    Returns None if the text has only one sentence or no strong complaint signal.
+    """
+    if not text:
+        return None
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    if len(sentences) <= 1:
+        return None
+    best_sentence, best_score = None, 0
+    for sent in sentences:
+        words = re.sub(r'[^a-z ]', '', sent.lower()).split()
+        score = sum(1 for w in words if w in _NEG_SIGNALS)
+        if '!' in sent:
+            score += 0.5
+        if score > best_score:
+            best_score = score
+            best_sentence = sent.strip()
+    # Only return if at least 2 complaint signals found
+    if best_score < 2 or best_sentence is None:
+        return None
+    if len(best_sentence) > max_len:
+        best_sentence = best_sentence[:max_len].rsplit(' ', 1)[0] + "..."
+    return best_sentence
 
 
 class LocalGuardrailedResponseGenerator:
@@ -129,10 +171,19 @@ class LocalGuardrailedResponseGenerator:
             )
         elif neg_aspects:
             neg_str = ", ".join(neg_aspects[:2])
-            response_parts.append(
-                f"We sincerely regret that your experience with our {neg_str} did not meet your expectations. "
-                "Your observations have been shared directly with our operations team to implement prompt improvements."
-            )
+            # Extractive complaint injection: pull the most negative sentence for specific acknowledgement
+            key_complaint = extract_key_complaint(review_text)
+            if key_complaint:
+                response_parts.append(
+                    f"We sincerely regret that your experience with our {neg_str} did not meet your expectations. "
+                    f"In particular, we noted your concern: \"{key_complaint}\" — this has been flagged directly "
+                    "with our operations team for immediate review and corrective action."
+                )
+            else:
+                response_parts.append(
+                    f"We sincerely regret that your experience with our {neg_str} did not meet your expectations. "
+                    "Your observations have been shared directly with our operations team to implement prompt improvements."
+                )
             response_parts.append(
                 f"If you would like to discuss this further, please feel free to drop us a note at {escalation_contact}."
             )
@@ -268,3 +319,4 @@ class ExternalLLMResponseGenerator:
             )
             res["note"] = f"LLM call encountered error ({str(e)}). Local fallback generator engaged seamlessly."
             return res
+

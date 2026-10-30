@@ -1,11 +1,17 @@
 {
   "test_dataset_size": 240,
   "sentiment_benchmark": {
+    "dummy_baseline": {
+      "accuracy": 0.4,
+      "macro_f1": 0.1905,
+      "weighted_f1": 0.2286,
+      "latency_ms": 0.001
+    },
     "baseline": {
       "accuracy": 0.5208,
       "macro_f1": 0.5163,
       "weighted_f1": 0.5317,
-      "latency_ms": 0.097
+      "latency_ms": 0.088
     },
     "ml_pipeline": {
       "accuracy": 1.0,
@@ -49,39 +55,45 @@
     "comparison_table": [
       {
         "Metric": "Accuracy",
+        "Dummy Baseline": "40.00%",
         "Lexicon Baseline": "52.08%",
         "Revio ML Pipeline": "100.00%",
-        "Absolute Lift": "+47.92%"
+        "Lift vs Dummy": "+60.00%"
       },
       {
         "Metric": "Macro F1-Score",
+        "Dummy Baseline": "19.05%",
         "Lexicon Baseline": "51.63%",
         "Revio ML Pipeline": "100.00%",
-        "Absolute Lift": "+48.37%"
+        "Lift vs Dummy": "+80.95%"
       },
       {
         "Metric": "Weighted F1-Score",
+        "Dummy Baseline": "22.86%",
         "Lexicon Baseline": "53.17%",
         "Revio ML Pipeline": "100.00%",
-        "Absolute Lift": "+46.83%"
+        "Lift vs Dummy": "+77.14%"
       },
       {
         "Metric": "Macro Precision",
+        "Dummy Baseline": "13.33%",
         "Lexicon Baseline": "69.07%",
         "Revio ML Pipeline": "100.00%",
-        "Absolute Lift": "+30.93%"
+        "Lift vs Dummy": "+86.67%"
       },
       {
         "Metric": "Macro Recall",
+        "Dummy Baseline": "33.33%",
         "Lexicon Baseline": "53.76%",
         "Revio ML Pipeline": "100.00%",
-        "Absolute Lift": "+46.24%"
+        "Lift vs Dummy": "+66.67%"
       },
       {
         "Metric": "Inference Latency (per review)",
-        "Lexicon Baseline": "0.097 ms",
+        "Dummy Baseline": "0.001 ms",
+        "Lexicon Baseline": "0.088 ms",
         "Revio ML Pipeline": "0.118 ms",
-        "Absolute Lift": "+0.021 ms"
+        "Lift vs Dummy": "+0.117 ms"
       }
     ],
     "confusion_matrix": {

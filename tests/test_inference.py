@@ -62,3 +62,4 @@ class TestInferenceEngine:
         assert "risk_tier" in results_df.columns
         assert results_df.iloc[0]["sentiment"] == "positive"
         assert results_df.iloc[1]["sentiment"] == "negative"
+

@@ -97,3 +97,4 @@ When deploying Revio for live enterprise clients, synthetic data will be substit
 2. **PII Redaction**: Run regex and Named Entity Recognition (NER) to redact credit card numbers, phone numbers, and customer names before model persistence.
 3. **Active Learning Loop**: Route low-confidence model inferences (< 0.65 probability) to branch managers for confirmation, continuously expanding the labeled gold-standard corpus.
 4. **Data Versioning**: Store raw and labeled snapshots in DVC (Data Version Control) with automated drift detection.
+
