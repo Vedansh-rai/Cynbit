@@ -329,20 +329,121 @@ The 100% test accuracy confirms the algorithmic coherence of our feature enginee
 
 ---
 
-## 15. Deployment & Production Roadmap
+## 15. Execution Plan & Production Roadmap
+
+### 15.1 Phase Overview
+
+The delivery is structured across four phases — from the current working prototype through to a fully monitored, multi-tenant cloud product.
 
 ```
-DEVELOPMENT (COMPLETED)     --> STAGING (WEEKS 1-3)            --> PRODUCTION (WEEKS 4-6)
-• Modular Python ML Engine    • FastAPI REST Wrapper             • Multi-Tenant Cloud Deployment
-• Streamlit Interactive UI    • Docker Containerization          • Prometheus & Grafana Metrics
-• 28 Passing Unit Tests       • Google Business Webhook Ingestion• Automated Continuous Retraining
-• Deterministic Fallback      • PostgreSQL Persistence           • Slack / SMS Instant Alerts
+Phase 0          Phase 1           Phase 2            Phase 3
+(Complete)       (Weeks 1–2)       (Weeks 3–4)        (Weeks 5–6)
+────────────     ─────────────     ──────────────     ──────────────
+PoC / MVP    ──► API & Backend ──► Cloud Deploy   ──► Monitor &
+Local Demo        Hardening         Integration        Iterate
 ```
 
-### 15.1 API Endpoint Specification (FastAPI Target)
-- `POST /api/v1/reviews/triage`: Accepts single review payload; returns sentiment, aspects, risk tier, and response draft.
-- `POST /api/v1/reviews/batch`: Accepts array of reviews; returns structured analytical records for dashboard feeds.
-- `GET /api/v1/health`: Returns model readiness status and inference latency telemetry.
+---
+
+### 15.2 Phase 0 — Proof of Concept (Completed)
+
+| Task | Owner | Status |
+| :--- | :--- | :---: |
+| Company & industry research (Cynbit / Revio) | ML Engineer | ✅ Done |
+| Opportunity identification & weighted scoring | ML Engineer | ✅ Done |
+| Synthetic dataset generation (1,200 reviews, seed=42) | ML Engineer | ✅ Done |
+| Core ML pipeline: TF-IDF + Calibrated Logistic Regression | ML Engineer | ✅ Done |
+| Multi-aspect ABSA suite (6 classifiers) | ML Engineer | ✅ Done |
+| Hybrid crisis risk estimator (ML + deterministic triggers) | ML Engineer | ✅ Done |
+| Guardrailed response engine (local + optional LLM) | ML Engineer | ✅ Done |
+| Streamlit 4-tab interactive dashboard | ML Engineer | ✅ Done |
+| 28-test unit test suite (pytest) | ML Engineer | ✅ Done |
+| Empirical evaluation report + baseline comparison | ML Engineer | ✅ Done |
+| AI Opportunity Report & Technical Approach Report | ML Engineer | ✅ Done |
+
+---
+
+### 15.3 Phase 1 — API Backend & Production Hardening (Weeks 1–2)
+
+**Goal:** Wrap the ML engine in a production-grade REST API and containerise it for portable deployment.
+
+| Week | Task | Deliverable |
+| :--- | :--- | :--- |
+| 1 | Build `POST /api/v1/reviews/triage` endpoint in FastAPI | Single-review triage API returning JSON payload |
+| 1 | Build `POST /api/v1/reviews/batch` endpoint | Bulk ingestion endpoint for webhook-pushed review arrays |
+| 1 | Build `GET /api/v1/health` liveness probe | Model readiness status + latency telemetry |
+| 1 | Add Pydantic v2 request/response schemas with strict validation | Type-safe API contract; no unhandled 422 errors |
+| 1 | Implement structured JSON logging (correlation IDs per request) | Audit trail for each review processed |
+| 2 | Write Dockerfile + `docker-compose.yml` | One-command local containerised deployment |
+| 2 | Configure GitHub Actions CI pipeline (lint → test → build) | Automated test gate on every pull request |
+| 2 | Integrate Google My Business Webhook ingestion adapter | Live review feed into the triage engine |
+| 2 | Replace SQLite with PostgreSQL for persistent review store | Production-grade data persistence |
+| 2 | Security hardening: rate limiting, API key auth, HTTPS enforcement | OWASP-compliant API surface |
+
+**Exit criteria:** API passes 100% of existing unit tests + load test at 500 req/s with p99 latency < 20 ms.
+
+---
+
+### 15.4 Phase 2 — Cloud Deployment & Platform Integration (Weeks 3–4)
+
+**Goal:** Deploy to cloud, connect live data sources, and deliver a multi-tenant dashboard.
+
+| Week | Task | Deliverable |
+| :--- | :--- | :--- |
+| 3 | Provision AWS ECS (or Azure Container Apps) + managed PostgreSQL | Cloud-hosted inference service |
+| 3 | Configure auto-scaling policy (scale out at 70% CPU, min 2 replicas) | High-availability inference tier |
+| 3 | Integrate Yelp Webhooks and Trustpilot API polling | Multi-platform review ingestion |
+| 3 | PII redaction pipeline (names, phone numbers, card numbers via regex + NER) | DPDP Act compliance before storage |
+| 4 | Build multi-tenant account isolation (per-client model config + DB schema) | Supports multiple Cynbit enterprise clients |
+| 4 | Slack & SMS alert webhook for CRITICAL/HIGH risk reviews | Instant branch manager notification |
+| 4 | Migrate Streamlit dashboard to React + FastAPI (headless backend) | Scalable, embeddable white-label UI |
+| 4 | Automated nightly model retraining trigger via GitHub Actions + DVC | Model stays current as data volume grows |
+
+**Exit criteria:** System processes ≥ 1,000 live reviews/day with zero critical alert misses and < 1% false positive crisis rate.
+
+---
+
+### 15.5 Phase 3 — Monitoring, Feedback Loop & Iteration (Weeks 5–6)
+
+**Goal:** Close the production feedback loop with monitoring, active learning, and model governance.
+
+| Week | Task | Deliverable |
+| :--- | :--- | :--- |
+| 5 | Deploy Prometheus + Grafana dashboards for latency, throughput, error rate | Operational SLO visibility |
+| 5 | Set up model drift detection (PSI on sentiment distribution weekly) | Early warning for distribution shift |
+| 5 | Implement human-annotation queue for low-confidence predictions (< 0.65) | Gold-label training data accumulation |
+| 5 | A/B test response engine: local guardrailed vs. external LLM | Quantify LLM value-add on real customer satisfaction scores |
+| 6 | Active learning loop: retrain on annotated samples, evaluate delta F1 | Continuous model improvement cycle |
+| 6 | Expand aspect taxonomy from 6 → 12 dimensions (e.g., Parking, Accessibility, Delivery) | Finer-grained operational diagnostics |
+| 6 | Add Hinglish lexicon support for Indian regional review patterns | Market-specific accuracy improvement |
+| 6 | Load test at 10,000 concurrent reviews; tune worker pool and batch size | Production scale validation |
+
+**Exit criteria:** Model F1 on real production data ≥ 85%; human intervention rate on auto-approvable stream < 5%.
+
+---
+
+### 15.6 API Endpoint Specification (FastAPI Target)
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/reviews/triage` | Single review: returns sentiment, aspects, risk tier, response draft |
+| `POST` | `/api/v1/reviews/batch` | Array of reviews: returns bulk triage records for dashboard feeds |
+| `GET` | `/api/v1/health` | Model readiness status + current inference latency telemetry |
+| `GET` | `/api/v1/metrics` | Prometheus-compatible scrape endpoint |
+| `POST` | `/api/v1/reviews/{id}/approve` | Human approves and queues response for platform dispatch |
+| `POST` | `/api/v1/reviews/{id}/escalate` | Human escalates review to legal/exec channel |
+
+---
+
+### 15.7 Risk Register
+
+| Risk | Likelihood | Impact | Mitigation |
+| :--- | :---: | :---: | :--- |
+| Synthetic-to-real data distribution shift drops F1 below 85% | Medium | High | Active learning + human annotation loop in Phase 3 |
+| External LLM API outage disrupts response generation | Low | Medium | Local deterministic fallback always active (0 ms) |
+| Google/Yelp webhook schema changes break ingestion | Medium | Medium | Versioned adapter layer with schema validation tests |
+| PII leak through review logging | Low | Critical | PII redaction pipeline applied before any persistence |
+| Model bias on regional Indian language patterns | High | Medium | Hinglish lexicon expansion + dialect-aware test set in Phase 3 |
 
 ---
 
