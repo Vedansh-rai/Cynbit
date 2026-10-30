@@ -101,14 +101,6 @@ st.markdown("""
         display: inline-block;
         margin: 2px;
     }
-    .footer-note {
-        font-size: 0.82rem;
-        color: #64748B;
-        border-top: 1px solid #E2E8F0;
-        margin-top: 40px;
-        padding-top: 12px;
-        text-align: center;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -550,11 +542,4 @@ flowchart TD
     """)
 
 
-# --- FOOTER ---
-st.markdown("""
-<div class="footer-note">
-    <strong>Revio AI Opportunity Proof of Concept</strong> | Built for AI/ML Engineer Intern Assessment | Cynbit Technologies Private Limited.<br>
-    <em>Notice: Demonstrates architectural and algorithmic feasibility using synthetic validation data. Operates entirely locally with zero external API dependencies required.</em>
-</div>
-""", unsafe_allow_html=True)
 
